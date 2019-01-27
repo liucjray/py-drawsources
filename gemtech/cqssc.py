@@ -4,7 +4,9 @@ from gemtech import *
 chrome_driver_path = os.getenv("CHROME_DRIVER_PATH")
 url = 'http://www.gem-ds.com/lottery.html?lottery=cqssc'
 
-browser = webdriver.Chrome(chrome_driver_path)
+options = ChromeOptions()
+options.headless = True
+browser = webdriver.Chrome(chrome_driver_path, options=options)
 delay = 1
 try:
     browser.get(url)
