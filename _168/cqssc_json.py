@@ -5,9 +5,9 @@ import schedule
 from _168 import *
 from lib.IssueInfo import *
 
-url = 'https://api.api68.com/pks/getPksHistoryList.do?lotCode=10001'
+url = 'https://api.api68.com/CQShiCai/getBaseCQShiCaiList.do?lotCode=10002'
 
-db_name = os.getenv("STORAGE_PATH") + 'pk10.db'
+db_name = os.getenv("STORAGE_PATH") + 'cqssc.db'
 
 
 def job():
