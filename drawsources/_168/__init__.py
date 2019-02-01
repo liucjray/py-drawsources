@@ -24,7 +24,7 @@ from drawsources._168.jsons import ssc_xj_json
 from drawsources._168.jsons import ssc_cq_json
 
 if __name__ == '__main__':
-    retry168 = os.getenv("RETRY_168", 10)
+    retry168 = int(os.getenv("RETRY_168", 10))
 
     scheduler = BlockingScheduler()
     # k3
