@@ -1,12 +1,8 @@
-import os
-import requests
-import datetime
-import schedule
 from drawsources._168 import *
 
-url = 'https://api.api68.com/ElevenFive/getElevenFiveList.do?date=&lotCode=10015'
+url = 'https://api.api68.com/klsf/getHistoryLotteryInfo.do?date=&lotCode=10005'
 
-db_name = os.getenv("STORAGE_PATH") + 'n115.db'
+db_name = os.getenv("STORAGE_PATH") + 'klsf.db'
 
 
 def job():
@@ -32,7 +28,7 @@ def job():
                 index = issues.index(issue)
                 row = {
                     'resource': '168',
-                    'area': 'jx',
+                    'area': 'gd',
                     'issue': issue,
                     'code': codes[index],
                     'created_at': datetime.datetime.now()
@@ -44,9 +40,3 @@ def job():
         print('Exception occurred.')
     finally:
         print('Finish@' + str(datetime.datetime.now()))
-
-
-schedule.every(10).seconds.do(job)
-
-while True:
-    schedule.run_pending()

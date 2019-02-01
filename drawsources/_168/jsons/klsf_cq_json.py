@@ -1,12 +1,8 @@
-import os
-import requests
-import datetime
-import schedule
 from drawsources._168 import *
 
-url = 'https://api.api68.com/CQShiCai/getBaseCQShiCaiList.do?lotCode=10002'
+url = 'https://api.api68.com/klsf/getHistoryLotteryInfo.do?date=&lotCode=10009'
 
-db_name = os.getenv("STORAGE_PATH") + 'ssc.db'
+db_name = os.getenv("STORAGE_PATH") + 'klsf.db'
 
 
 def job():
@@ -44,9 +40,3 @@ def job():
         print('Exception occurred.')
     finally:
         print('Finish@' + str(datetime.datetime.now()))
-
-
-schedule.every(10).seconds.do(job)
-
-while True:
-    schedule.run_pending()
