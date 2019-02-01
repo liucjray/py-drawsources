@@ -6,6 +6,8 @@ deferred_db = SqliteDatabase(None, autocommit=False)
 class IssueInfo(Model):
     # 號源
     resource = CharField()
+    # 區域
+    area = CharField()
     # 獎期
     issue = CharField()
     # 號碼

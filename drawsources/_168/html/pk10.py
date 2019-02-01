@@ -1,6 +1,6 @@
 import os
 import time
-from _168 import *
+from drawsources._168 import *
 
 chrome_driver_path = os.getenv("CHROME_DRIVER_PATH")
 url = 'http://www.1680099.com/beijingsaichePK10.html'

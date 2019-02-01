@@ -2,12 +2,11 @@ import os
 import requests
 import datetime
 import schedule
-from _168 import *
-from lib.IssueInfo import *
+from drawsources._168 import *
 
-url = 'https://api.api68.com/CQShiCai/getBaseCQShiCaiList.do?lotCode=10002'
+url = 'https://api.api68.com/lotteryJSFastThree/getJSFastThreeList.do?date=&lotCode=10033'
 
-db_name = os.getenv("STORAGE_PATH") + 'cqssc.db'
+db_name = os.getenv("STORAGE_PATH") + 'k3.db'
 
 
 def job():
@@ -33,6 +32,7 @@ def job():
                 index = issues.index(issue)
                 row = {
                     'resource': '168',
+                    'area': 'bj',
                     'issue': issue,
                     'code': codes[index],
                     'created_at': datetime.datetime.now()
@@ -40,7 +40,8 @@ def job():
                 data.append(row)
             deferred_db.init(db_name)
             IssueInfo.insert_many(data).execute()
-
+    except ():
+        print('Exception occurred.')
     finally:
         print('Finish@' + str(datetime.datetime.now()))
 
