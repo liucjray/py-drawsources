@@ -24,27 +24,29 @@ from drawsources._168.jsons import ssc_xj_json
 from drawsources._168.jsons import ssc_cq_json
 
 if __name__ == '__main__':
+    retry168 = os.getenv("RETRY_168", 10)
+
     scheduler = BlockingScheduler()
     # k3
-    scheduler.add_job(k3_ah_json.job, 'interval', seconds=10)
-    scheduler.add_job(k3_bj_json.job, 'interval', seconds=10)
-    scheduler.add_job(k3_gx_json.job, 'interval', seconds=10)
-    scheduler.add_job(k3_hb_json.job, 'interval', seconds=10)
-    scheduler.add_job(k3_jx_json.job, 'interval', seconds=10)
+    scheduler.add_job(k3_ah_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(k3_bj_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(k3_gx_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(k3_hb_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(k3_jx_json.job, 'interval', seconds=retry168)
     # klsf
-    scheduler.add_job(klsf_cq_json.job, 'interval', seconds=10)
-    scheduler.add_job(klsf_gd_json.job, 'interval', seconds=10)
+    scheduler.add_job(klsf_cq_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(klsf_gd_json.job, 'interval', seconds=retry168)
     # n115
-    scheduler.add_job(n115_sd_json.job, 'interval', seconds=10)
-    scheduler.add_job(n115_jx_json.job, 'interval', seconds=10)
-    scheduler.add_job(n115_gd_json.job, 'interval', seconds=10)
+    scheduler.add_job(n115_sd_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(n115_jx_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(n115_gd_json.job, 'interval', seconds=retry168)
     # pk10
-    scheduler.add_job(pk10_bj_json.job, 'interval', seconds=10)
+    scheduler.add_job(pk10_bj_json.job, 'interval', seconds=retry168)
     # ssc
-    scheduler.add_job(ssc_cq_json.job, 'interval', seconds=10)
-    scheduler.add_job(ssc_xj_json.job, 'interval', seconds=10)
+    scheduler.add_job(ssc_cq_json.job, 'interval', seconds=retry168)
+    scheduler.add_job(ssc_xj_json.job, 'interval', seconds=retry168)
 
     try:
         scheduler.start()
-    except (KeyboardInterrupt, SystemExit):
+    except ():
         pass
