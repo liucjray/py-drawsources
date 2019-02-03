@@ -1,11 +1,8 @@
 from drawsources._168 import *
 
-url = 'https://api.api68.com/ElevenFive/getElevenFiveList.do?date=&lotCode=10008'
-
-db_name = os.getenv("STORAGE_PATH") + 'n115.db'
-
 
 def job():
+    url = 'https://api.api68.com/ElevenFive/getElevenFiveList.do?date=&lotCode=10008'
     try:
         print('Start@' + str(datetime.datetime.now()))
         r = requests.get(url)
@@ -28,14 +25,14 @@ def job():
                 index = issues.index(issue)
                 row = {
                     'resource': '168',
+                    'type': 'n115',
                     'area': 'sd',
                     'issue': issue,
                     'code': codes[index],
                     'created_at': datetime.datetime.now()
                 }
                 data.append(row)
-            deferred_db.init(db_name)
-            IssueInfo.insert_many(data).execute()
+            IssueInfo.insert_many(data).on_conflict('ignore').execute()
     except ():
         print('Exception occurred.')
     finally:

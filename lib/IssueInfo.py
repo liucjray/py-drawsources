@@ -1,11 +1,19 @@
 from peewee import *
+from lib import *
 
-deferred_db = SqliteDatabase(None, autocommit=False)
+db = SqliteDatabase("C:\\B2B\\drawsource\\storages\\ds.db")
 
 
-class IssueInfo(Model):
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+
+class IssueInfo(BaseModel):
     # 號源
     resource = CharField()
+    # 類型
+    type = CharField()
     # 區域
     area = CharField()
     # 獎期
@@ -16,4 +24,7 @@ class IssueInfo(Model):
     created_at = DateTimeField()
 
     class Meta:
-        database = deferred_db
+        # 唯一索引
+        indexes = (
+            (('resource', 'type', 'area', 'issue'), True),
+        )
