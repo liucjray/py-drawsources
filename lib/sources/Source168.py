@@ -44,7 +44,12 @@ class Source168:
                     'created_at': str(datetime.datetime.now())
                 }
                 prepare_insert.append(row)
-            IssueInfo.insert_many(prepare_insert).on_conflict('ignore').execute()
+
+            # 切分一百組資料為一個 chunk 避免資料量大無法寫入問題
+            chunks = [prepare_insert[x:x + 100] for x in range(0, len(prepare_insert), 100)]
+
+            for chunk in chunks:
+                IssueInfo.insert_many(chunk).on_conflict('ignore').execute()
         else:
             print('Validate Error!')
 
