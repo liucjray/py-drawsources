@@ -1,8 +1,6 @@
 import os
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-from settings import env
-
 from drawsources._168.jsons import k3_ah_json
 from drawsources._168.jsons import k3_bj_json
 from drawsources._168.jsons import k3_gx_json
@@ -16,6 +14,7 @@ from drawsources._168.jsons import n115_sd_json
 from drawsources._168.jsons import pk10_bj_json
 from drawsources._168.jsons import ssc_xj_json
 from drawsources._168.jsons import ssc_cq_json
+from drawsources._168.jsons import ssc_tj_json
 
 if __name__ == '__main__':
     try:
@@ -40,6 +39,7 @@ if __name__ == '__main__':
             # ssc
             ssc_cq_json.get_instance(),
             ssc_xj_json.get_instance(),
+            ssc_tj_json.get_instance(),
         ]:
             scheduler.add_job(job.handle, 'interval', seconds=retry168)
             # scheduler.add_job(job.handle, 'cron', second='*/5')
