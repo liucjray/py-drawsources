@@ -5,6 +5,9 @@ from lib.IssueInfo import *
 
 
 class Source168:
+
+    __domain__ = 'http://api.api68.com/'
+
     def __init__(self, settings):
         self.settings = Dict(settings)
         self.data = Dict()
@@ -17,7 +20,7 @@ class Source168:
         self.issues = []
 
     def parse(self):
-        url = self.settings.url
+        url = self.__domain__ + self.settings.url
         r = requests.get(url).json()
         d = Dict(r)
         self.data = d.result.data
