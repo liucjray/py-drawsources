@@ -51,7 +51,10 @@ class Source168:
             for chunk in chunks:
                 IssueInfo.insert_many(chunk).on_conflict('ignore').execute()
         else:
-            print('Validate Error!')
+            print('Validate Error! resource: {} type: {} area: {}'.format(
+                self.settings.resource,
+                self.settings.type,
+                self.settings.area))
 
     def validate(self):
         return len(self.codes) == len(self.issues) \
