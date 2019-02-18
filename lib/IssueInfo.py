@@ -1,7 +1,7 @@
 from peewee import *
 from lib import *
 
-db = SqliteDatabase("C:\\B2B\\drawsource\\storages\\ds.db")
+db = SqliteDatabase("C:\\B2B\\drawsources\\storages\\ds.db")
 
 
 class BaseModel(Model):
