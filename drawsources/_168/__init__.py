@@ -22,24 +22,24 @@ if __name__ == '__main__':
         scheduler = BlockingScheduler()
         for job in [
             # k3
-            k3_ah_json.get_instance(),
-            k3_bj_json.get_instance(),
-            k3_gx_json.get_instance(),
-            k3_hb_json.get_instance(),
-            k3_jx_json.get_instance(),
+            # k3_ah_json.get_instance(),
+            # k3_bj_json.get_instance(),
+            # k3_gx_json.get_instance(),
+            # k3_hb_json.get_instance(),
+            # k3_jx_json.get_instance(),
             # klsf
             klsf_cq_json.get_instance(),
-            klsf_gd_json.get_instance(),
-            # n115
-            n115_sd_json.get_instance(),
-            n115_jx_json.get_instance(),
-            n115_gd_json.get_instance(),
-            # pk10
-            pk10_bj_json.get_instance(),
-            # ssc
-            ssc_cq_json.get_instance(),
-            ssc_xj_json.get_instance(),
-            ssc_tj_json.get_instance(),
+            # klsf_gd_json.get_instance(),
+            # # n115
+            # n115_sd_json.get_instance(),
+            # n115_jx_json.get_instance(),
+            # n115_gd_json.get_instance(),
+            # # pk10
+            # pk10_bj_json.get_instance(),
+            # # ssc
+            # ssc_cq_json.get_instance(),
+            # ssc_xj_json.get_instance(),
+            # ssc_tj_json.get_instance(),
         ]:
             scheduler.add_job(job.handle, 'interval', seconds=retry168)
             # scheduler.add_job(job.handle, 'cron', second='*/5')

@@ -8,7 +8,7 @@ if __name__ == '__main__':
             # klsf
             klsf_cq_html.get_instance(),
         ]:
-            scheduler.add_job(job.handle, 'interval', seconds=15)
+            scheduler.add_job(job.handle, 'interval', seconds=20)
             # scheduler.add_job(job.handle, 'cron', second='*/5')
 
         scheduler.start()
