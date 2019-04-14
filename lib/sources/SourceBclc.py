@@ -20,7 +20,8 @@ class SourceBclc:
 
     def parse(self):
         url = self.__domain__ + self.settings.url
-        r = requests.get(url, verify=False).json()
+        r = requests.get(url, verify=False, proxies=self.settings.proxies).json()
+        # print(r)
         self.data = r
 
     def get_codes(self):
