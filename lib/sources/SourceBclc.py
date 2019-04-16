@@ -2,6 +2,7 @@ import datetime
 import requests
 from addict import Dict
 from lib.IssueInfo import *
+from dateutil.parser import parse
 
 
 class SourceBclc:
@@ -12,17 +13,20 @@ class SourceBclc:
         self.data = Dict()
         self.codes = []
         self.issues = []
+        self.infos = []
 
     def clean(self):
         self.data = Dict()
         self.codes = []
         self.issues = []
+        self.infos = []
 
     def parse(self):
         url = self.__domain__ + self.settings.url
         r = requests.get(url, verify=False, proxies=self.settings.proxies).json()
         # print(r)
         self.data = r
+        self.get_infos()
 
     def get_codes(self):
         for row in self.data:
@@ -36,6 +40,11 @@ class SourceBclc:
         for row in self.data:
             self.issues.append(row['drawNbr'])
 
+    def get_infos(self):
+        for row in self.data:
+            dt = parse(row['drawDate'] + ' ' + row['drawTime'])
+            self.infos.append(dt)
+
     def write(self):
         if self.validate():
             prepare_insert = []
@@ -47,6 +56,7 @@ class SourceBclc:
                     'area': self.settings.area,
                     'issue': issue,
                     'code': self.codes[index],
+                    'info': self.infos[index],
                     'created_at': str(datetime.datetime.now())
                 }
                 prepare_insert.append(row)

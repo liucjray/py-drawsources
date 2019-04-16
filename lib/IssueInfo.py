@@ -20,6 +20,8 @@ class IssueInfo(BaseModel):
     issue = CharField()
     # 號碼
     code = CharField()
+    # 附加資訊
+    info = TextField()
     # 建立時間
     created_at = DateTimeField()
 
