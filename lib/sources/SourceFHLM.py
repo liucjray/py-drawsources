@@ -4,9 +4,8 @@ from addict import Dict
 from lib.IssueInfo import *
 
 
-class Source168:
-
-    __domain__ = 'http://api.api68.com/'
+class SourceFHLM:
+    __domain__ = 'https://www.fhlm.com/_data/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -25,19 +24,19 @@ class Source168:
         url = self.__domain__ + self.settings.url
         r = requests.get(url).json()
         d = Dict(r)
-        self.data = d.result.data
+        self.data = d.list
 
     def get_codes(self):
         for code in self.data:
-            self.codes.append(code.preDrawCode)
+            self.codes.append(','.join(code.code))
 
     def get_issues(self):
         for issue in self.data:
-            self.issues.append(issue.preDrawIssue)
+            self.issues.append(issue.issue)
 
     def get_infos(self):
         for issue in self.data:
-            self.infos.append(issue.preDrawTime)
+            self.infos.append(issue.time)
 
     def write(self):
         if self.validate():

@@ -4,9 +4,8 @@ from addict import Dict
 from lib.IssueInfo import *
 
 
-class Source168:
-
-    __domain__ = 'http://api.api68.com/'
+class SourcePK10ME:
+    __domain__ = 'https://www.pk10.me/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -23,21 +22,21 @@ class Source168:
 
     def parse(self):
         url = self.__domain__ + self.settings.url
-        r = requests.get(url).json()
+        r = requests.get(url, headers=self.settings.headers).json()
         d = Dict(r)
-        self.data = d.result.data
+        self.data = d.data.newest
 
     def get_codes(self):
-        for code in self.data:
-            self.codes.append(code.preDrawCode)
+        codes = []
+        for code in self.data.array:
+            codes.append(str(code).zfill(2))
+        self.codes.append(','.join(codes))
 
     def get_issues(self):
-        for issue in self.data:
-            self.issues.append(issue.preDrawIssue)
+        self.issues.append(str(self.data.issue))
 
     def get_infos(self):
-        for issue in self.data:
-            self.infos.append(issue.preDrawTime)
+        self.infos.append(str(self.data.issue))
 
     def write(self):
         if self.validate():
@@ -60,6 +59,7 @@ class Source168:
 
             for chunk in chunks:
                 IssueInfo.insert_many(chunk).on_conflict('ignore').execute()
+
         else:
             print('Validate Error! resource: {} type: {} area: {}'.format(
                 self.settings.resource,

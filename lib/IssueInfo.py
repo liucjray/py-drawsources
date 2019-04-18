@@ -21,7 +21,7 @@ class IssueInfo(BaseModel):
     # 號碼
     code = CharField()
     # 附加資訊
-    info = TextField()
+    info = TextField(null=True)
     # 建立時間
     created_at = DateTimeField()
 
