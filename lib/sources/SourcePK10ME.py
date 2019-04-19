@@ -2,9 +2,10 @@ import datetime
 import requests
 from addict import Dict
 from lib.IssueInfo import *
+from lib.sources.SourceBase import *
 
 
-class SourcePK10ME:
+class SourcePK10ME(SourceBase):
     __domain__ = 'https://www.pk10.me/'
 
     def __init__(self, settings):
@@ -22,7 +23,8 @@ class SourcePK10ME:
 
     def parse(self):
         url = self.__domain__ + self.settings.url
-        r = requests.get(url, headers=self.settings.headers).json()
+        http_proxy = {'http': self.get_random_http_proxy()}
+        r = requests.get(url, headers=self.settings.headers, proxies=http_proxy).json()
         d = Dict(r)
         self.data = d.data.newest
 

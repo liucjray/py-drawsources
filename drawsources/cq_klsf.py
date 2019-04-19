@@ -15,7 +15,7 @@ if __name__ == '__main__':
             cq_klsf_pk10me.get_instance(),
             cq_klsf_apilottery.get_instance(),
         ]:
-            scheduler.add_job(job.handle, 'interval', seconds=10)
+            scheduler.add_job(job.handle, 'interval', seconds=15)
 
         scheduler.start()
     except Exception as e:

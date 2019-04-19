@@ -9,5 +9,5 @@ def get_instance():
         'type': 'klsf',
         'headers': {
             'x-requested-with': 'XMLHttpRequest'
-        }
+        },
     })
