@@ -3,9 +3,10 @@ import requests
 from addict import Dict
 from lib.IssueInfo import *
 from dateutil.parser import parse
+from lib.sources.SourceBase import *
 
 
-class SourceBclc:
+class SourceBclc(SourceBase):
     __domain__ = 'https://lotto.bclc.com/'
 
     def __init__(self, settings):
@@ -23,8 +24,8 @@ class SourceBclc:
 
     def parse(self):
         url = self.__domain__ + self.settings.url
-        r = requests.get(url, verify=False, proxies=self.settings.proxies).json()
-        # print(r)
+        http_proxy = {'http': self.get_random_proxy(self.get_proxy_by_country('canada'))}
+        r = requests.get(url, verify=False, proxies=http_proxy).json()
         self.data = r
         self.get_infos()
 

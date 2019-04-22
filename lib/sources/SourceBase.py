@@ -25,3 +25,14 @@ class SourceBase:
         http_proxies = self.get_http_proxy()
         proxy = random.choice(http_proxies)
         return proxy
+
+    def get_proxy_by_country(self, country):
+        s = os.getenv("STORAGE_PATH")
+        file_name = '{}{}_{}.txt'.format(s, 'http_proxy', country)
+        with open(file_name) as f:
+            proxy = f.read().splitlines()
+        return proxy
+
+    def get_random_proxy(self, proxies):
+        proxy = random.choice(proxies)
+        return proxy
