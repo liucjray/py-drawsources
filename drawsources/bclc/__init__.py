@@ -9,8 +9,10 @@ if __name__ == '__main__':
         scheduler = BlockingScheduler()
         for job in [
             keno_ca_json.get_instance(),
+            keno_ca_json.get_instance(),
+            keno_ca_json.get_instance(),
         ]:
-            scheduler.add_job(job.handle, 'interval', seconds=retry)
+            scheduler.add_job(job.handle, 'interval', seconds=retry, max_instances=10)
             # scheduler.add_job(job.handle, 'cron', second='*/5')
 
         scheduler.start()

@@ -15,6 +15,7 @@ class SourceBclc(SourceBase):
         self.codes = []
         self.issues = []
         self.infos = []
+        self.https_proxy = {}
 
     def clean(self):
         self.data = Dict()
@@ -24,8 +25,8 @@ class SourceBclc(SourceBase):
 
     def parse(self):
         url = self.__domain__ + self.settings.url
-        http_proxy = {'http': self.get_random_proxy(self.get_proxy_by_country('canada'))}
-        r = requests.get(url, verify=False, proxies=http_proxy).json()
+        self.https_proxy = {'https': self.get_random_proxy(self.get_proxy_by_country('canada'))}
+        r = requests.get(url, verify=False, proxies=self.https_proxy).json()
         self.data = r
         self.get_infos()
 
@@ -79,10 +80,16 @@ class SourceBclc(SourceBase):
                and len(self.issues) > 0
 
     def handle(self):
-        print('Start: %s' % datetime.datetime.now())
-        self.clean()
-        self.parse()
-        self.get_issues()
-        self.get_codes()
-        self.write()
-        print('End: %s' % datetime.datetime.now())
+        try:
+            print('Start: %s' % datetime.datetime.now())
+            self.clean()
+            self.parse()
+            self.get_issues()
+            self.get_codes()
+            self.write()
+        except:
+            print('[X] handle error.', self.https_proxy)
+        else:
+            print('[O] handle success.', self.https_proxy)
+        finally:
+            print('End: %s' % datetime.datetime.now())
