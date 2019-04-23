@@ -5,8 +5,8 @@ from lib.IssueInfo import *
 from lib.sources.SourceBase import *
 
 
-class SourcePK10ME(SourceBase):
-    __domain__ = 'https://www.pk10.me/'
+class Source1396J(SourceBase):
+    __domain__ = 'https://www.1396j.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -26,19 +26,19 @@ class SourcePK10ME(SourceBase):
         http_proxy = {'http': self.get_random_http_proxy()}
         r = requests.get(url, headers=self.settings.headers, proxies=http_proxy).json()
         d = Dict(r)
-        self.data = d.data.newest
+        self.data = d.current
 
     def get_codes(self):
-        codes = []
-        for code in self.data.array:
-            codes.append(str(code).zfill(2))
-        self.codes.append(','.join(codes))
+        self.codes.append(self.data.result)
 
     def get_issues(self):
-        self.issues.append(str(self.data.issue))
+        # 解析時間並格式化輸出
+        dt = datetime.datetime.strptime(self.data.awardTime, '%Y-%m-%d %H:%M:%S').strftime('%Y%m%d')
+        issue = '%s-%s' % (dt, str(self.data.period).zfill(2))
+        self.issues.append(issue)
 
     def get_infos(self):
-        self.infos.append(str(self.data.time))
+        self.infos.append(str(self.data.awardTime))
 
     def write(self):
         if self.validate():
