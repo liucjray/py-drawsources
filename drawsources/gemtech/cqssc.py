@@ -1,5 +1,4 @@
 import os
-from gemtech import *
 
 chrome_driver_path = os.getenv("CHROME_DRIVER_PATH")
 url = 'http://www.gem-ds.com/lottery.html?lottery=cqssc'
