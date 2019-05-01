@@ -3,6 +3,7 @@ import requests
 from addict import Dict
 from lib.IssueInfo import *
 from pymongo import MongoClient
+from lib.formatter.Coder import *
 
 
 class SourceFHLM:
@@ -31,7 +32,9 @@ class SourceFHLM:
 
     def get_codes(self):
         for code in self.data:
-            self.codes.append(','.join(code.code))
+            formatter = Coder(type=self.settings.type, code=code.code)
+            formatter_code = formatter.get_code()
+            self.codes.append(','.join(formatter_code))
 
     def get_issues(self):
         for issue in self.data:
