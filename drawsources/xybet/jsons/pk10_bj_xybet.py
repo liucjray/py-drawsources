@@ -5,7 +5,7 @@ def get_instance():
     return SourceXYBET({
         'url': 'dscagamesclient/issue.do?method=recentlyCode',
         'resource': 'xybet',
-        'area': 'malta',
-        'type': 'xyft',
-        'raw_body': 'gameid=1&pageNum=1&size=30',
+        'area': 'cn',
+        'type': 'pk10',
+        'raw_body': 'gameid=13&pageNum=1&size=30',
     })
