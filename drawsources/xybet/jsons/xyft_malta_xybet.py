@@ -7,4 +7,5 @@ def get_instance():
         'resource': 'xybet',
         'area': 'malta',
         'type': 'xyft',
+        'raw_body': 'gameid=39&pageNum=1&size=30',
     })

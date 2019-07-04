@@ -25,7 +25,7 @@ class SourceXYBET:
         url = self.__domain__ + self.settings.url
 
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        raw_body = "gameid=39&pageNum=1&size=30"
+        raw_body = self.settings.raw_body
 
         r = requests.post(url, headers=headers, data=raw_body).json()
         d = dict_get(r, 'items')
