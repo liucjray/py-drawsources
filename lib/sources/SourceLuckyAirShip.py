@@ -2,6 +2,8 @@ import datetime
 import requests
 from addict import Dict
 from lib.IssueInfo import *
+from bs4 import BeautifulSoup
+import re
 
 
 class SourceLuckyAirShip:
@@ -20,18 +22,33 @@ class SourceLuckyAirShip:
 
     def parse(self):
         url = self.__domain__ + self.settings.url
-        r = requests.get(url).json()
-        d = Dict(r)
-        print(d)
-        self.data = d
+        r = requests.get(url).text
+        soup = BeautifulSoup(r, 'lxml')
+        trs = soup.select('table tr')
 
-    def get_codes(self):
-        code = ','.join(str(e) for e in self.data.numbersArray)
-        self.codes.append(code)
+        issues = []
+        codes = []
+        for tr in trs[1:]:
+            # 取得 issue
+            pattern = re.compile(r'<td>(\d{11})</td>')
+            issue = pattern.findall(str(tr))[0]
+            issues.append(issue)
+
+            # 取得 code
+            pattern = re.compile(r'<span class="ball(\d)">(\d{1,2})</span>')
+            code = pattern.findall(str(tr))
+            code = list(map(lambda x: str(x[1]).zfill(2), code))
+            codes.append(','.join(code))
+
+        self.data = dict(zip(issues, codes))
+        self.issues = issues
+        self.codes = codes
 
     def get_issues(self):
-        issue = self.data.openedPeriodNumber
-        self.issues.append(issue)
+        return self.issues
+
+    def get_codes(self):
+        return self.codes
 
     def write(self):
         if self.validate():
@@ -72,3 +89,12 @@ class SourceLuckyAirShip:
         self.get_codes()
         self.write()
         print('End: %s' % datetime.datetime.now())
+
+
+# s = SourceLuckyAirShip({
+#     'url': 'history.html',
+#     'resource': 'luckyairship',
+#     'area': 'malta',
+#     'type': 'xyft',
+# })
+# s.handle()

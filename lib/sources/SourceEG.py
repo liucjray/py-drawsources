@@ -92,10 +92,11 @@ class SourceEG:
         self.write()
         print('End: %s' % datetime.datetime.now())
 
+
 # eg = SourceEG({
-#     'url': 'api/GetFcAutoToNum?fc_id=80&page=1&period=&stime=&etime=',
+#     'url': 'api/GetFcAutoToNum?fc_id=1&page=1&period=&stime=&etime=',
 #     'resource': 'eg',
-#     'area': 'malta',
-#     'type': 'xyft',
+#     'area': 'cq',
+#     'type': 'ssc',
 # })
 # eg.handle()

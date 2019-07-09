@@ -98,10 +98,10 @@ class SourceBOMAOCAI:
         print('End: %s' % datetime.datetime.now())
 
 
-# s = SourceBOMACAI({
-#     'url': 'issueannoucement',
-#     'resource': 'bomaocai',
-#     'area': 'bj',
-#     'type': 'pk10',
-# })
-# s.handle()
+s = SourceBOMAOCAI({
+    'url': 'issueannoucement',
+    'resource': 'bomaocai',
+    'area': 'cq',
+    'type': 'ssc',
+})
+s.handle()

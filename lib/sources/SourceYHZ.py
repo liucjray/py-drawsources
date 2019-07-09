@@ -3,10 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 
 from lib.IssueInfo import *
-import re
+from lib.sources.SourceBase import *
+from lib.sources.SourceYHZSSC import *
+from lib.sources.SourceYHZPK10 import *
+from lib.sources.SourceYHZKL8 import *
 
 
-class SourceYHZ:
+class SourceYHZ(SourceBase):
     __domain__ = 'http://www.1hz878.com/'
 
     def __init__(self, settings):
@@ -14,6 +17,13 @@ class SourceYHZ:
         self.data = {}
         self.codes = []
         self.issues = []
+        self.https_proxy = {}
+        self.parser_map = {
+            'cqssc': SourceYHZSSC(),
+            'bjpk10': SourceYHZPK10(),
+            'bjkl8': SourceYHZKL8(),
+        }
+        self.parser = None
 
     def clean(self):
         self.data = {}
@@ -22,35 +32,20 @@ class SourceYHZ:
 
     def parse(self):
         url = self.__domain__ + self.settings['url']
+        self.https_proxy = {'https': self.get_random_proxy(self.get_proxy_by_country('singapore'))}
 
-        r = requests.get(url, verify=False)
-
-        soup = BeautifulSoup(r.text, 'lxml')
-
-        selector = "table#codeTable tr"
-        trs = soup.select(selector)
-
-        for tr in trs:
-            if trs.index(tr) == 0 or trs.index(tr) == 1:
-                continue
-
-            # issues
-            for issue in tr.find_all("td", class_="title"):
-                self.issues.append(issue.text)
-
-            # codes
-            codes = []
-            for code in tr.find_all("td", class_="code"):
-                codes.append(code.text)
-            self.codes.append(','.join(codes))
-
-        self.data = dict(zip(self.issues, self.codes))
-
-    def get_codes(self):
-        return self.codes
+        try:
+            r = requests.get(url, verify=False, proxies=self.https_proxy)
+            area_type = self.settings['area'] + self.settings['type']
+            self.data = self.parser_map[area_type].parse(r)
+        except Exception as e:
+            print('Exception error: ' + str(e))
 
     def get_issues(self):
-        return self.issues
+        self.issues = list(self.data.keys())
+
+    def get_codes(self):
+        self.codes = list(self.data.values())
 
     def write(self):
         if self.validate():
@@ -74,11 +69,12 @@ class SourceYHZ:
                 IssueInfo.insert_many(chunk).on_conflict('ignore').execute()
         else:
             print('Validate Error! resource: {} type: {} area: {}'.format(
-                self.settings.resource,
-                self.settings.type,
-                self.settings.area))
+                self.settings['resource'],
+                self.settings['type'],
+                self.settings['area']))
 
     def validate(self):
+        # print(len(self.codes) == len(self.issues), len(self.codes), len(self.issues))
         return len(self.codes) == len(self.issues) \
                and len(self.codes) > 0 \
                and len(self.issues) > 0
@@ -93,10 +89,10 @@ class SourceYHZ:
         print('End: %s' % datetime.datetime.now())
 
 
-# s = SourceYHZ({
-#     'url': '?controller=game&action=bonuscode&lotteryid=20&issuecount=30',
-#     'resource': 'yhz',
-#     'area': 'bj',
-#     'type': 'pk10',
-# })
-# s.handle()
+s = SourceYHZ({
+    'url': '?controller=game&action=bonuscode&lotteryid=9&issuecount=30',
+    'resource': 'yhz',
+    'area': 'bj',
+    'type': 'kl8',
+})
+s.handle()
