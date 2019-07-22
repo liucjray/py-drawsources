@@ -33,7 +33,7 @@ class SourceXYBET:
 
     def get_issues(self):
         for row in self.data:
-            issue = "20" + dict_get(row, 'issue')
+            issue = dict_get(row, 'issue')
             self.issues.append(issue)
 
     def get_codes(self):
@@ -91,8 +91,8 @@ class SourceXYBET:
 # s = SourceXYBET({
 #     'url': 'dscagamesclient/issue.do?method=recentlyCode',
 #     'resource': 'xybet',
-#     'area': 'cq',
-#     'type': 'ssc',
-#     'raw_body': 'gameid=1&pageNum=1&size=30',
+#     'area': 'bj',
+#     'type': 'kl8',
+#     'raw_body': 'gameid=27&pageNum=1&size=30',
 # })
 # s.handle()

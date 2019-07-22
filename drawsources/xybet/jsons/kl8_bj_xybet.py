@@ -6,6 +6,6 @@ def get_instance():
         'url': 'dscagamesclient/issue.do?method=recentlyCode',
         'resource': 'xybet',
         'area': 'bj',
-        'type': 'pk10',
-        'raw_body': 'gameid=13&pageNum=1&size=30',
+        'type': 'kl8',
+        'raw_body': 'gameid=27&pageNum=1&size=30',
     })
