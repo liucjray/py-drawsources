@@ -3,10 +3,12 @@ from datetime import timedelta, datetime
 import requests
 from addict import Dict
 from lib.IssueInfo import *
+from bs4 import BeautifulSoup
+from urllib.parse import urlencode
 
 
-class Source168:
-    __domain__ = 'http://api.api68.com/'
+class SourceCaiPiaoAPI:
+    __domain__ = 'https://www.caipiaoapi.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -21,23 +23,42 @@ class Source168:
         self.issues = []
         self.draw_at = []
 
+    def before_parse(self):
+        url = "{}hall/hallhistory/detail/{}/{}".format(self.__domain__, 119, self.settings.date)
+        r = requests.get(url, verify=False)
+        soup = BeautifulSoup(r.text, 'lxml')
+        q_time = soup.find(id="time").get('value')
+        q_passwd = soup.find(id="passwd").get('value')
+        return q_time, q_passwd
+
     def parse(self):
-        url = self.__domain__ + self.settings.url
+        # https://www.caipiaoapi.com/hall/hallhistory/ajax_detail?gameid=119&date=2019-11-26&pagenum=1&time=1574757613&passwd=9f710feb73fbf28ba6080a730e2e9a08
+        time, passwd = self.before_parse()
+
+        q_dict = {
+            'gameid': self.settings.gameid,
+            'date': self.settings.date,
+            'pagenum': self.settings.pagenum,
+            'time': time,
+            'passwd': passwd,
+        }
+        q_string = urlencode(q_dict)
+        url = "{}{}?{}".format(self.__domain__, self.settings.url, q_string)
         r = requests.get(url).json()
         d = Dict(r)
-        self.data = d.result.data
+        self.data = d.datalist
 
     def get_codes(self):
         for code in self.data:
-            self.codes.append(code.preDrawCode)
+            self.codes.append(code.award)
 
     def get_issues(self):
         for issue in self.data:
-            self.issues.append(issue.preDrawIssue)
+            self.issues.append(issue.gid)
 
     def get_draw_ats(self):
         for issue in self.data:
-            self.draw_at.append(issue.preDrawTime)
+            self.draw_at.append(issue.at)
 
     def write(self):
         if self.validate():
@@ -72,11 +93,16 @@ class Source168:
                and len(self.issues) > 0
 
     def handle(self):
-        print('Start: %s' % datetime.now())
-        self.clean()
-        self.parse()
-        self.get_issues()
-        self.get_codes()
-        self.get_draw_ats()
-        self.write()
-        print('End: %s' % datetime.now())
+        try:
+            print('Start: %s' % datetime.now())
+            self.clean()
+            self.parse()
+            self.get_issues()
+            self.get_codes()
+            self.get_draw_ats()
+            self.write()
+            print('End: %s' % datetime.now())
+        except Exception as e:
+            print(e)
+
+

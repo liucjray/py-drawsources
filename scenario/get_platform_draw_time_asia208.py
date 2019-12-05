@@ -8,9 +8,9 @@ if __name__ == '__main__':
     try:
         scheduler = BlockingScheduler()
 
-        scheduler.add_job(klsf_asia_json.get_instance().handle, 'interval', seconds=6)
-        scheduler.add_job(klsf_asia_json2.get_instance().handle, 'interval', seconds=6, jitter=2)
-        scheduler.add_job(klsf_asia_json3.get_instance().handle, 'interval', seconds=6, jitter=2)
+        scheduler.add_job(klsf_asia_json.get_instance().handle, 'interval', seconds=4)
+        # scheduler.add_job(klsf_asia_json2.get_instance().handle, 'interval', seconds=6, jitter=2)
+        # scheduler.add_job(klsf_asia_json3.get_instance().handle, 'interval', seconds=6, jitter=2)
 
         scheduler.start()
     except Exception as e:

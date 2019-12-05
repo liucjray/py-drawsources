@@ -5,8 +5,8 @@ from addict import Dict
 from lib.IssueInfo import *
 
 
-class Source168:
-    __domain__ = 'http://api.api68.com/'
+class Source188:
+    __domain__ = 'http://18881111.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -80,3 +80,4 @@ class Source168:
         self.get_draw_ats()
         self.write()
         print('End: %s' % datetime.now())
+
