@@ -1,44 +1,53 @@
-import time
-from datetime import timedelta, datetime
+import datetime
 import requests
-from addict import Dict
+import re
+from bs4 import BeautifulSoup
+
 from lib.IssueInfo import *
 
 
-class Source168:
-    __domain__ = 'http://api.api68.com/'
+class SourceCaim8:
+    __domain__ = 'http://www.caim8.com/'
 
     def __init__(self, settings):
-        self.settings = Dict(settings)
-        self.__domain__ = settings.get('domain', self.__domain__)
-        self.data = Dict()
+        self.settings = settings
+        self.data = {}
         self.codes = []
         self.issues = []
-        self.draw_at = []
 
     def clean(self):
-        self.data = Dict()
+        self.data = {}
         self.codes = []
         self.issues = []
-        self.draw_at = []
 
     def parse(self):
-        url = self.__domain__ + self.settings.url
-        r = requests.get(url).json()
-        d = Dict(r)
-        self.data = d.result.data
+        url = self.__domain__ + self.settings['uri']
+        print(url)
+
+        r = requests.get(url)
+
+        soup = BeautifulSoup(r.text, 'lxml')
+        tbody = soup.select('.ssc > tr')
+
+        for tr in tbody:
+            tds = tr.find_all('td')
+
+            # 取得 issues
+            issue = re.findall(r'\d+', tds[0].text)[0]
+            self.issues.append(issue)
+
+            # 取得 codes
+            codes = []
+            for code in tds[1].find_all('span', limit=5):
+                codes.append(code.text)
+            self.codes.append(','.join(codes))
+        self.data = dict(zip(self.issues, self.codes))
 
     def get_codes(self):
-        for code in self.data:
-            self.codes.append(code.preDrawCode)
+        return self.codes
 
     def get_issues(self):
-        for issue in self.data:
-            self.issues.append(issue.preDrawIssue)
-
-    def get_draw_ats(self):
-        for issue in self.data:
-            self.draw_at.append(issue.preDrawTime)
+        return self.issues
 
     def write(self):
         if self.validate():
@@ -46,13 +55,12 @@ class Source168:
             for issue in self.issues:
                 index = self.issues.index(issue)
                 row = {
-                    'resource': self.settings.resource,
-                    'type': self.settings.type,
-                    'area': self.settings.area,
+                    'resource': self.settings['resource'],
+                    'type': self.settings['type'],
+                    'area': self.settings['area'],
                     'issue': issue,
                     'code': self.codes[index],
-                    'draw_at': self.draw_at[index],
-                    'created_at': str(datetime.now())
+                    'created_at': str(datetime.datetime.now())
                 }
                 prepare_insert.append(row)
 
@@ -73,11 +81,10 @@ class Source168:
                and len(self.issues) > 0
 
     def handle(self):
-        print('Start: %s' % datetime.now())
+        print('Start: %s' % datetime.datetime.now())
         self.clean()
         self.parse()
         self.get_issues()
         self.get_codes()
-        self.get_draw_ats()
         self.write()
-        print('End: %s' % datetime.now())
+        print('End: %s' % datetime.datetime.now())

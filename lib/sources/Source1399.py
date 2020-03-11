@@ -1,44 +1,47 @@
-import time
-from datetime import timedelta, datetime
+import datetime
 import requests
 from addict import Dict
 from lib.IssueInfo import *
+from lib.sources.SourceBase import *
 
 
-class Source168:
-    __domain__ = 'http://api.api68.com/'
+class Source1399(SourceBase):
+    __domain__ = 'https://www.1399klc.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
-        self.__domain__ = settings.get('domain', self.__domain__)
         self.data = Dict()
         self.codes = []
         self.issues = []
-        self.draw_at = []
+        self.infos = []
+        self.draw_ats = []
 
     def clean(self):
         self.data = Dict()
         self.codes = []
         self.issues = []
-        self.draw_at = []
+        self.infos = []
+        self.draw_ats = []
 
     def parse(self):
         url = self.__domain__ + self.settings.url
-        r = requests.get(url).json()
+        http_proxy = {'http': self.get_random_http_proxy()}
+        r = requests.get(url, headers=self.settings.headers, proxies=http_proxy).json()
+
         d = Dict(r)
-        self.data = d.result.data
+        self.data = d.Data.rows
 
     def get_codes(self):
-        for code in self.data:
-            self.codes.append(code.preDrawCode)
+        for row in self.data:
+            self.codes.append(row.Result)
 
     def get_issues(self):
-        for issue in self.data:
-            self.issues.append(issue.preDrawIssue)
+        for row in self.data:
+            self.issues.append(row.IssueNo)
 
     def get_draw_ats(self):
-        for issue in self.data:
-            self.draw_at.append(issue.preDrawTime)
+        for row in self.data:
+            self.draw_ats.append(row.AwardDate)
 
     def write(self):
         if self.validate():
@@ -51,8 +54,8 @@ class Source168:
                     'area': self.settings.area,
                     'issue': issue,
                     'code': self.codes[index],
-                    'draw_at': self.draw_at[index],
-                    'created_at': str(datetime.now())
+                    'draw_at': self.draw_ats[index],
+                    'created_at': str(datetime.datetime.now())
                 }
                 prepare_insert.append(row)
 
@@ -61,6 +64,7 @@ class Source168:
 
             for chunk in chunks:
                 IssueInfo.insert_many(chunk).on_conflict('ignore').execute()
+
         else:
             print('Validate Error! resource: {} type: {} area: {}'.format(
                 self.settings.resource,
@@ -73,11 +77,11 @@ class Source168:
                and len(self.issues) > 0
 
     def handle(self):
-        print('Start: %s' % datetime.now())
+        print('Start: %s' % datetime.datetime.now())
         self.clean()
         self.parse()
         self.get_issues()
         self.get_codes()
         self.get_draw_ats()
         self.write()
-        print('End: %s' % datetime.now())
+        print('End: %s' % datetime.datetime.now())

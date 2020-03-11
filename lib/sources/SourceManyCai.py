@@ -3,11 +3,10 @@ import requests
 from addict import Dict
 from lib.IssueInfo import *
 from pymongo import MongoClient
-from lib.formatter.Coder import *
 
 
-class SourceFHLM:
-    __domain__ = 'https://www.fhlm.com/'
+class SourceManyCai:
+    __domain__ = 'http://www.manycai365.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -28,23 +27,33 @@ class SourceFHLM:
 
     def parse(self):
         url = self.__domain__ + self.settings.uri
-        r = requests.get(url).json()
+
+        header = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Referer": self.__domain__,
+            "X-Requested-With": "XMLHttpRequest"
+        }
+        form = {
+            'lotterycode': 'HN300',
+            'lotteryname': 'HN300',
+            'page': '1',
+        }
+        r = requests.post(url, data=form, headers=header).json()
+
         d = Dict(r)
-        self.data = d.list
+        self.data = d.data
 
     def get_codes(self):
-        for code in self.data:
-            formatter = Coder(type=self.settings.type, code=code.code)
-            formatter_code = formatter.get_code()
-            self.codes.append(','.join(formatter_code))
+        for row in self.data:
+            self.codes.append(row.code)
 
     def get_issues(self):
-        for issue in self.data:
-            self.issues.append(issue.issue)
+        for row in self.data:
+            self.issues.append(row.issue)
 
     def get_draw_ats(self):
         for row in self.data:
-            self.draw_at.append(row.time)
+            self.draw_at.append(row.opendate)
 
     def write(self):
         if self.validate():

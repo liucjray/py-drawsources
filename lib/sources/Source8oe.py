@@ -6,32 +6,40 @@ from bs4 import BeautifulSoup
 import re
 
 
-class SourceApiLottery:
-    __domain__ = 'http://www.apilottery.com/'
+class Source8oe:
+    __domain__ = 'https://lottery.8oe.com/'
 
     font_map_code = {
-        '\ue342': 0,
-        '\ue512': 1,
-        '\ue808': 2,
-        '\ue456': 3,
-        '\ue542': 4,
-        '\ue338': 5,
-        '\ue293': 6,
-        '\ue831': 7,
-        '\ue098': 8,
-        '\ue132': 9,
-    }
-    font2_map_code = {
-        '\ue831': 0,
-        '\ue338': 1,
-        '\ue808': 2,
-        '\ue456': 3,
-        '\ue542': 4,
-        '\ue132': 5,
-        '\ue293': 6,
-        '\ue098': 7,
-        '\ue342': 8,
-        '\ue512': 9,
+        "&#xe9e7f;": "0",
+        "&#xe1720;": "0",
+        "&#xf187f;": "0",
+        "&#xe824f;": "1",
+        "&#xff4e5;": "1",
+        "&#xe79f6;": "1",
+        "&#xef613;": "2",
+        "&#xf38e2;": "2",
+        "&#xe36e0;": "2",
+        "&#xe4169;": "3",
+        "&#xe6834;": "3",
+        "&#xf3679;": "3",
+        "&#xef804;": "4",
+        "&#xf04e5;": "4",
+        "&#xef798;": "4",
+        "&#xe769e;": "5",
+        "&#xe61f5;": "5",
+        "&#xe502f;": "5",
+        "&#xe785f;": "6",
+        "&#xff201;": "6",
+        "&#xf0914;": "6",
+        "&#xe6839;": "7",
+        "&#xe67f3;": "7",
+        "&#xf9e58;": "7",
+        "&#xee238;": "8",
+        "&#xe4501;": "8",
+        "&#xe318e;": "8",
+        "&#xe4209;": "9",
+        "&#xe7650;": "9",
+        "&#xe7ef8;": "9",
     }
 
     def __init__(self, settings):
@@ -49,10 +57,34 @@ class SourceApiLottery:
         self.infos = []
         self.draw_ats = []
 
+    def get_token(self):
+        url = self.__domain__ + self.settings.view_url
+        r = requests.get(url)
+        token = re.findall(r'data\.font = \"(\w{32})\"', r.text)[0]
+        return token
+
     def parse(self):
+
+        token = self.get_token()
+
         url = self.__domain__ + self.settings.url
-        r = requests.get(url, headers=self.settings.headers).json()
+
+        header = {
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Cookie': 'se=0eef194829e86aa49fc44caf70524d48; __cfduid=d7f653af941d25cede19e5d01928ff22b1582094517; PHPSESSID=s4v0ged1n2d97ie7up30du7qg2; Hm_lvt_8ddac7a4bda5523c8e3763aa582fef10=1582094534; security_session_verify=6f4f6c3ed407c49b83aa672c0a9d7305; Hm_lpvt_8ddac7a4bda5523c8e3763aa582fef10=1582102246',
+        }
+
+        form = {
+            'limit': '60',
+            'date': '2020-02-18',
+            'code': '1',
+            'path': token,
+            'page': '1'
+        }
+        r = requests.post(url, data=form, headers=header).json()
         d = Dict(r)
+        print(r)
+        exit()
         self.data = d.data
 
     def get_font_map_code(self, soup):
@@ -64,36 +96,6 @@ class SourceApiLottery:
             return self.font2_map_code
         else:
             print('font map {} not found.'.format(matches[0]))
-
-    def parse_html(self):
-        url = self.__domain__ + self.settings.url
-        print(url)
-
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, 'lxml')
-
-        font_map_code = self.get_font_map_code(soup)
-        trs = soup.select('.layui-table > tbody > tr')
-
-        i = 0
-        for tr in trs:
-            i = i + 1
-            issue = tr.select('td')[0].text
-            self.issues.append(issue)
-
-            codes = []
-            for code in tr.select('td > .code'):
-                codes.append(self.decode_code(font_map_code, code.text))
-            code = ",".join(codes)
-            self.codes.append(code)
-
-            draw_at = tr.select('td')[2].text
-            self.draw_ats.append(draw_at)
-
-        # print(self.issues)
-        # print(self.codes)
-        # print(self.draw_ats)
-        # exit()
 
     def decode_code(self, code_map, code):
         codes = []
@@ -147,7 +149,7 @@ class SourceApiLottery:
     def handle(self):
         print('Start: %s' % datetime.datetime.now())
         self.clean()
-        self.parse_html()
+        self.parse()
         self.get_issues()
         self.get_codes()
         self.get_draw_ats()

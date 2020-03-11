@@ -3,14 +3,14 @@ from datetime import timedelta, datetime
 import requests
 from addict import Dict
 from lib.IssueInfo import *
+from database.connection import *
 
 
-class Source168:
+class Source168MYSQL:
     __domain__ = 'http://api.api68.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
-        self.__domain__ = settings.get('domain', self.__domain__)
         self.data = Dict()
         self.codes = []
         self.issues = []
@@ -59,7 +59,9 @@ class Source168:
             # 切分一百組資料為一個 chunk 避免資料量大無法寫入問題
             chunks = [prepare_insert[x:x + 100] for x in range(0, len(prepare_insert), 100)]
 
+            db = get_instance()
             for chunk in chunks:
+
                 IssueInfo.insert_many(chunk).on_conflict('ignore').execute()
         else:
             print('Validate Error! resource: {} type: {} area: {}'.format(

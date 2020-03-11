@@ -1,44 +1,50 @@
-import time
-from datetime import timedelta, datetime
+import datetime
 import requests
 from addict import Dict
 from lib.IssueInfo import *
+from helpers.Common import *
 
 
-class Source168:
-    __domain__ = 'http://api.api68.com/'
+class Source163v2:
+    __domain__ = 'https://www.1632014.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
-        self.__domain__ = settings.get('domain', self.__domain__)
         self.data = Dict()
-        self.codes = []
         self.issues = []
+        self.codes = []
         self.draw_at = []
 
     def clean(self):
         self.data = Dict()
-        self.codes = []
         self.issues = []
+        self.codes = []
         self.draw_at = []
 
     def parse(self):
         url = self.__domain__ + self.settings.url
         r = requests.get(url).json()
-        d = Dict(r)
-        self.data = d.result.data
-
-    def get_codes(self):
-        for code in self.data:
-            self.codes.append(code.preDrawCode)
+        d = dict_get(r, 'result')
+        self.data = d
 
     def get_issues(self):
-        for issue in self.data:
-            self.issues.append(issue.preDrawIssue)
+        for row in self.data:
+            issue = row['sgameperiod']
+            self.issues.append(issue)
 
-    def get_draw_ats(self):
-        for issue in self.data:
-            self.draw_at.append(issue.preDrawTime)
+    def get_codes(self):
+        for row in self.data:
+            code = row['sopennum']
+
+            format_row_codes = []
+            for x in code.split('|'):
+                format_row_codes.append(x.zfill(2))
+            self.codes.append(','.join(format_row_codes))
+
+    def get_draw_at(self):
+        for row in self.data:
+            time = row['dmodifytime']
+            self.draw_at.append(time)
 
     def write(self):
         if self.validate():
@@ -52,7 +58,7 @@ class Source168:
                     'issue': issue,
                     'code': self.codes[index],
                     'draw_at': self.draw_at[index],
-                    'created_at': str(datetime.now())
+                    'created_at': str(datetime.datetime.now())
                 }
                 prepare_insert.append(row)
 
@@ -68,16 +74,30 @@ class Source168:
                 self.settings.area))
 
     def validate(self):
+        # msg = 'validate:{}, {}, {}'.format(
+        #     len(self.codes) == len(self.issues),
+        #     len(self.codes),
+        #     len(self.issues)
+        # )
         return len(self.codes) == len(self.issues) \
                and len(self.codes) > 0 \
                and len(self.issues) > 0
 
     def handle(self):
-        print('Start: %s' % datetime.now())
+        print('Start: %s' % datetime.datetime.now())
         self.clean()
         self.parse()
         self.get_issues()
         self.get_codes()
-        self.get_draw_ats()
+        self.get_draw_at()
         self.write()
-        print('End: %s' % datetime.now())
+        print('End: %s' % datetime.datetime.now())
+#
+#
+# s163 = Source163({
+#     'url': 'm/getlotdata.html?DataType=1&lotCode=80208',
+#     'resource': '163',
+#     'area': 'asia',
+#     'type': 'klsf',
+# })
+# s163.handle()
