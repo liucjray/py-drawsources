@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 import re
 
 
-class SourceLuckyAirShip:
-    __domain__ = 'http://www.luckyairship.com/'
+class SourceLAODL:
+    __domain__ = 'https://laodl.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -23,24 +23,31 @@ class SourceLuckyAirShip:
     def parse(self):
         url = self.__domain__ + self.settings.url
         r = requests.get(url).text
+
+        # print(r)
+
         soup = BeautifulSoup(r, 'lxml')
-        trs = soup.select('table tr')
+        rows = soup.select('#main .row-main > .col > .col-inner > .row')[1:]
+
+        # print(len(rows))
+        # exit()
 
         issues = []
         codes = []
-        for tr in trs[1:]:
-            # 取得 issue
-            pattern = re.compile(r'<td>(\d{11})</td>')
-            issue = pattern.findall(str(tr))[0]
+        for row in rows:
+            col_inner = row.select('.col > .col-inner')[0]
+            issue = col_inner.find('h4').text
+            issue = issue[-10:].split('/')
+            issue.reverse()
+            issue = '-'.join(issue)
             issues.append(issue)
 
-            # 取得 code
-            pattern = re.compile(r'<span class="ball(\d)">(\d{1,2})</span>')
-            code = pattern.findall(str(tr))
-            code = list(map(lambda x: str(x[1]).zfill(2), code))
-            codes.append(','.join(code))
+            row = col_inner.select('.row')[0]
+            code = row.find('h2').text
+            codes.append(code[-3:] + ',' + code[1:3])
 
-        self.data = dict(zip(issues, codes))
+        print(issues, codes)
+
         self.issues = issues
         self.codes = codes
 
@@ -50,10 +57,6 @@ class SourceLuckyAirShip:
     def get_codes(self):
         return self.codes
 
-    def get_draw_at(self):
-        for row in self.data:
-            time = row[1]
-            self.draw_at.append(time)
 
     def write(self):
         if self.validate():
@@ -81,11 +84,13 @@ class SourceLuckyAirShip:
                 self.settings.type,
                 self.settings.area))
 
+
     def validate(self):
         print(self.codes, self.issues)
         return len(self.codes) == len(self.issues) \
                and len(self.codes) > 0 \
                and len(self.issues) > 0
+
 
     def handle(self):
         print('Start: %s' % datetime.datetime.now())
@@ -97,10 +102,10 @@ class SourceLuckyAirShip:
         print('End: %s' % datetime.datetime.now())
 
 
-# s = SourceLuckyAirShip({
-#     'url': 'history.html',
-#     'resource': 'luckyairship',
-#     'area': 'malta',
-#     'type': 'xyft',
-# })
-# s.handle()
+s = SourceLAODL({
+    'resource': 'laodl',
+    'type': 'la',
+    'area': 'la',
+    'url': 'com/previous-lottery/',
+})
+s.handle()

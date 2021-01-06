@@ -1,13 +1,13 @@
 import datetime
 import requests
+import re
 from addict import Dict
 from lib.IssueInfo import *
 from bs4 import BeautifulSoup
-import re
 
 
-class SourceLuckyAirShip:
-    __domain__ = 'http://www.luckyairship.com/'
+class SourceThaihuay:
+    __domain__ = 'https://www.thaihuay.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
@@ -23,24 +23,22 @@ class SourceLuckyAirShip:
     def parse(self):
         url = self.__domain__ + self.settings.url
         r = requests.get(url).text
+
         soup = BeautifulSoup(r, 'lxml')
-        trs = soup.select('table tr')
+        articles = soup.select('#main article')
 
         issues = []
         codes = []
-        for tr in trs[1:]:
-            # 取得 issue
-            pattern = re.compile(r'<td>(\d{11})</td>')
-            issue = pattern.findall(str(tr))[0]
+        for article in articles:
+            issue = article.find('h2', {'class': 'entry-title'}).text
             issues.append(issue)
 
-            # 取得 code
-            pattern = re.compile(r'<span class="ball(\d)">(\d{1,2})</span>')
-            code = pattern.findall(str(tr))
-            code = list(map(lambda x: str(x[1]).zfill(2), code))
-            codes.append(','.join(code))
+            code = article.select('.entry-title a')[0].get('href')
+            codes.append(code)
 
-        self.data = dict(zip(issues, codes))
+        if not codes:
+            return False
+
         self.issues = issues
         self.codes = codes
 
@@ -49,11 +47,6 @@ class SourceLuckyAirShip:
 
     def get_codes(self):
         return self.codes
-
-    def get_draw_at(self):
-        for row in self.data:
-            time = row[1]
-            self.draw_at.append(time)
 
     def write(self):
         if self.validate():
@@ -95,12 +88,3 @@ class SourceLuckyAirShip:
         self.get_codes()
         self.write()
         print('End: %s' % datetime.datetime.now())
-
-
-# s = SourceLuckyAirShip({
-#     'url': 'history.html',
-#     'resource': 'luckyairship',
-#     'area': 'malta',
-#     'type': 'xyft',
-# })
-# s.handle()

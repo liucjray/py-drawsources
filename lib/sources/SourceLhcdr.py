@@ -6,43 +6,54 @@ from bs4 import BeautifulSoup
 import re
 
 
-class SourceLuckyAirShip:
-    __domain__ = 'http://www.luckyairship.com/'
+class SourceLhcdr:
+    __domain__ = 'https://lhcdr.com/'
 
     def __init__(self, settings):
         self.settings = Dict(settings)
         self.data = Dict()
         self.codes = []
         self.issues = []
+        self.draw_at = []
 
     def clean(self):
         self.data = Dict()
         self.codes = []
         self.issues = []
+        self.draw_at = []
 
     def parse(self):
         url = self.__domain__ + self.settings.url
         r = requests.get(url).text
         soup = BeautifulSoup(r, 'lxml')
-        trs = soup.select('table tr')
+        trs = soup.select('ul.hisInfo li.hisMore')
 
         issues = []
         codes = []
-        for tr in trs[1:]:
-            # 取得 issue
-            pattern = re.compile(r'<td>(\d{11})</td>')
-            issue = pattern.findall(str(tr))[0]
-            issues.append(issue)
+        draw_at = []
+        for tr in trs:
+            soup = BeautifulSoup(str(tr), 'lxml')
+            spans = soup.select('span')
+            for span in spans[1:]:
+                i = spans.index(span)
+                if i == 1:
+                    issues.append(span.text.strip())
+                if i == 2:
+                    draw_at.append(span.text.strip())
+                if i == 3:
+                    # 移除所有空白
+                    pattern1 = re.compile(r'\s+')
+                    t = re.sub(pattern1, '', span.text)
+                    # 非數字轉換為逗點
+                    pattern2 = re.compile(r'\D')
+                    t = re.sub(pattern2, ',', t)
+                    # 移除最後一個,
+                    t = t[:-1].zfill(2)
+                    codes.append(t)
 
-            # 取得 code
-            pattern = re.compile(r'<span class="ball(\d)">(\d{1,2})</span>')
-            code = pattern.findall(str(tr))
-            code = list(map(lambda x: str(x[1]).zfill(2), code))
-            codes.append(','.join(code))
-
-        self.data = dict(zip(issues, codes))
         self.issues = issues
         self.codes = codes
+        self.draw_at = draw_at
 
     def get_issues(self):
         return self.issues
@@ -66,6 +77,7 @@ class SourceLuckyAirShip:
                     'area': self.settings.area,
                     'issue': issue,
                     'code': self.codes[index],
+                    'draw_at': self.draw_at[index],
                     'created_at': str(datetime.datetime.now())
                 }
                 prepare_insert.append(row)
@@ -95,12 +107,3 @@ class SourceLuckyAirShip:
         self.get_codes()
         self.write()
         print('End: %s' % datetime.datetime.now())
-
-
-# s = SourceLuckyAirShip({
-#     'url': 'history.html',
-#     'resource': 'luckyairship',
-#     'area': 'malta',
-#     'type': 'xyft',
-# })
-# s.handle()
